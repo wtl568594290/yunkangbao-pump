@@ -1,0 +1,7 @@
+.history
+.vscode
+Listings
+Objects
+*.wtl
+*.uvopt
+test.*
