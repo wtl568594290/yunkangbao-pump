@@ -1,5 +1,6 @@
 #include "pump.h"
 
+#define CYCLIC 5
 enum
 {
     ON,
@@ -16,23 +17,24 @@ typedef struct
 
 static uchar Mode;
 static uint Count;
+static uchar CyclicSec[4] = {12, 18, 16, 24}; // 每个模式的周期
 // TODO 多维结构体数组 无结构体需要补{0}
-static param Param[4][2][5] = {
+static param Param[4][2][CYCLIC] = {
     {
-        {{5000, 200, 3000}, {15000, 200, 3000}, {25000, 200, 3000}, {0}, {0}},
-        {{10000, 200, 3000}, {20000, 200, 3000}, {30000, 200, 3000}, {0}, {0}},
+        {{6000, 250, 2000}, {18000, 250, 2000}, {30000, 250, 2000}, {42000, 250, 2000}, {0}},
+        {{0, 250, 2000}, {12000, 250, 2000}, {24000, 250, 2000}, {36000, 250, 2000}, {48000, 250, 2000}},
     },
     {
-        {{8000, 100, 1500}, {16000, 100, 1500}, {30000, 100, 1500}, {0}, {0}},
-        {{16000, 100, 1500}, {24000, 100, 1500}, {30000, 100, 1500}, {0}, {0}},
+        {{4000, 150, 1000}, {7000, 150, 2000}, {16000, 150, 1000}, {0}, {0}},
+        {{0, 150, 1000}, {8000, 150, 1000}, {12000, 150, 1000}, {15000, 150, 2000}, {0}},
     },
     {
-        {{6000, 100, 1000}, {12000, 100, 1000}, {18000, 100, 1000}, {24000, 100, 1000}, {30000, 100, 1000}},
-        {{6000, 100, 1000}, {12000, 100, 1000}, {18000, 100, 1000}, {24000, 100, 1000}, {30000, 100, 1000}},
+        {{2000, 100, 0}, {3000, 50, 0}, {4000, 50, 0}, {0, 0, 5000}, {0}},
+        {{10000, 100, 0}, {11000, 50, 0}, {12000, 50, 0}, {0, 0, 13000}, {0}},
     },
     {
-        {{8000, 100, 1000}, {16000, 100, 1000}, {30000, 100, 1000}, {0}, {0}},
-        {{16000, 100, 1000}, {24000, 100, 1000}, {30000, 100, 1000}, {0}, {0}},
+        {{0, 250, 1000}, {6000, 120, 1000}, {12000, 160, 1000}, {18000, 200, 1000}, {24000, 250, 1000}},
+        {{0, 250, 1000}, {6000, 120, 1000}, {12000, 160, 1000}, {18000, 200, 1000}, {24000, 250, 1000}},
     },
 };
 
@@ -45,59 +47,58 @@ void Pump_5ms()
     uchar i, j;
     if (Mode)
     {
-        if (++Count > (33 * 200))
+        if (++Count > (CyclicSec[Mode - 1] * 200))
         {
             Count = 0;
         }
         for (i = 0; i < 2; i++)
         {
-            for (j = 0; j < 5; j++)
+            for (j = 0; j < CYCLIC; j++)
             {
-                if (Param[Mode - 1][i][j].startInto > 1)
+                // 提前憋气
+                if (Param[Mode - 1][i][j].startInto > 100 && Count * 5 == Param[Mode - 1][i][j].startInto - 100)
                 {
-                    if (Count * 5 == Param[Mode - 1][i][j].startInto - 1000)
+                    if (i == LEFT)
                     {
-                        if (i == LEFT)
-                        {
-                            IO_TAP_LEFT_LEAVE = ON;
-                        }
-                        else
-                        {
-                            IO_TAP_RIGHT_LEAVE = ON;
-                        }
+                        IO_TAP_LEFT_LEAVE = ON;
                     }
-                    else if (Count * 5 == Param[Mode - 1][i][j].startInto)
+                    else
                     {
-                        if (i == LEFT)
-                        {
-                            IO_TAP_LEFT_INTO = ON;
-                        }
-                        else
-                        {
-                            IO_TAP_RIGHT_INTO = ON;
-                        }
+                        IO_TAP_RIGHT_LEAVE = ON;
                     }
-                    else if (Count * 5 == Param[Mode - 1][i][j].startInto + Param[Mode - 1][i][j].into)
+                }
+                // 进气时长大于0  才会开启进气口
+                else if (Param[Mode - 1][i][j].startInto && Param[Mode - 1][i][j].into && Count * 5 == Param[Mode - 1][i][j].startInto)
+                {
+                    if (i == LEFT)
                     {
-                        if (i == LEFT)
-                        {
-                            IO_TAP_LEFT_INTO = OFF;
-                        }
-                        else
-                        {
-                            IO_TAP_RIGHT_INTO = OFF;
-                        }
+                        IO_TAP_LEFT_INTO = ON;
                     }
-                    else if (Count * 5 == Param[Mode - 1][i][j].startInto + Param[Mode - 1][i][j].keep)
+                    else
                     {
-                        if (i == LEFT)
-                        {
-                            IO_TAP_LEFT_LEAVE = OFF;
-                        }
-                        else
-                        {
-                            IO_TAP_RIGHT_LEAVE = OFF;
-                        }
+                        IO_TAP_RIGHT_INTO = ON;
+                    }
+                }
+                else if (Param[Mode - 1][i][j].into && Count * 5 == Param[Mode - 1][i][j].startInto + Param[Mode - 1][i][j].into)
+                {
+                    if (i == LEFT)
+                    {
+                        IO_TAP_LEFT_INTO = OFF;
+                    }
+                    else
+                    {
+                        IO_TAP_RIGHT_INTO = OFF;
+                    }
+                }
+                else if (Param[Mode - 1][i][j].keep && Count * 5 == Param[Mode - 1][i][j].startInto + Param[Mode - 1][i][j].keep)
+                {
+                    if (i == LEFT)
+                    {
+                        IO_TAP_LEFT_LEAVE = OFF;
+                    }
+                    else
+                    {
+                        IO_TAP_RIGHT_LEAVE = OFF;
                     }
                 }
             }
@@ -150,7 +151,6 @@ void Pump_SetMode(uchar mode)
     }
 }
 
-bit t;
 /**
  * @brief 足泵主循环
  *
