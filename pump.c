@@ -18,7 +18,8 @@ typedef struct
 static uchar Mode;
 static uint Count;
 static uchar CyclicSec[4] = {12, 18, 24, 16}; // 每个模式的周期
-// TODO 多维结构体数组 无结构体需要补{0}
+// 多维结构体数组 无结构体需要补{0}
+// TODO 减小频率
 static param Param[4][2][CYCLIC] = {
     {
         {{6000, 250, 2000}, {18000, 250, 2000}, {30000, 250, 2000}, {42000, 250, 2000}, {0}},
@@ -115,21 +116,16 @@ void Pump_5ms()
  */
 void Pump_Init()
 {
-    P4M1 &= ~(1 << 5);
-    P4M0 &= ~(1 << 5);
-    P2M1 &= ~(1 << 4 | 1 << 5 | 1 << 6 | 1 << 7);
-    P2M0 &= ~(1 << 4 | 1 << 5 | 1 << 6 | 1 << 7);
+    P2M1 &= ~(1 | 1 << 1 | 1 << 2 | 1 << 3);
+    P2M0 &= ~(1 | 1 << 1 | 1 << 2 | 1 << 3);
+    P5M1 &= ~(1 << 4);
+    P5M0 &= ~(1 << 4);
     IO_AIR = OFF;
     IO_TAP_LEFT_LEAVE = OFF;
     IO_TAP_RIGHT_LEAVE = OFF;
     IO_TAP_LEFT_INTO = OFF;
     IO_TAP_RIGHT_INTO = OFF;
     // TODO 开机放气
-    // IO_TAP_LEFT_INTO = ON;
-    // IO_TAP_RIGHT_INTO = ON;
-    // Delay3000ms();
-    // IO_TAP_LEFT_INTO = OFF;
-    // IO_TAP_RIGHT_INTO = OFF;
 
     Mode = 0;
     Count = 0;
