@@ -140,6 +140,8 @@ void Uart_Tx(Uart_port port, uchar *buf, uchar len)
     {
     case Uart_PORT_1:
         uart1Tx(buf, len);
+        // 串口1发送之后,延时30ms
+        Delay_ms(30);
         break;
     }
 }

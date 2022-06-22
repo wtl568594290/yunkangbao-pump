@@ -3,6 +3,8 @@
 #include "led.h"
 #include "pump.h"
 #include "master.h"
+#include "adc.h"
+#include "temperature.h"
 /**
  * @brief 定时器1初始化
  *
@@ -21,12 +23,19 @@ void T1_Init()
 void T1() interrupt 3
 {
     static uchar count5ms = 0;
+    static uint count1s = 0;
     if (++count5ms >= 5)
     {
         count5ms = 0;
         // 5ms
         Uart_5ms();
         Pump_5ms();
+        Temperature_5ms();
+    }
+    if (++count1s >= 1000)
+    {
+        count1s = 0;
+        // 1s
     }
 }
 
@@ -52,10 +61,13 @@ void main()
     Uart_Init();
     LED_Init();
     Pump_Init();
+    ADC_Init();
+    Temperature_Init();
     EA = 1;
     while (1)
     {
         Pump();
         Master();
+        Temperature();
     }
 }

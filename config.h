@@ -2,8 +2,8 @@
 #define CONFIG_H
 
 #include "STC8H.H"
-#include "delay.h"
 #include "intrins.h"
+#include "delay.h"
 #include "string.h"
 
 typedef unsigned char uchar;

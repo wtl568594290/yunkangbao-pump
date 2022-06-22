@@ -1,5 +1,10 @@
 #include "master.h"
 
+typedef enum
+{
+    Type_ReportTemp = 0xB1, // 发送温度
+} CMDType;
+
 /**
  * @brief 通信主循环
  *
@@ -21,4 +26,22 @@ void Master()
             }
         }
     }
+}
+
+/**
+ * @brief 报告温度
+ *
+ * @param over
+ */
+void Master_ReportTemperature(bit over)
+{
+    uchar buf[7] = {0};
+    buf[0] = 0xEE;
+    buf[1] = Type_ReportTemp;
+    buf[2] = over;
+    buf[3] = 0xFF;
+    buf[4] = 0xFC;
+    buf[5] = 0xFF;
+    buf[6] = 0xFF;
+    Uart_Tx(Uart_PORT_1, buf, 7);
 }
