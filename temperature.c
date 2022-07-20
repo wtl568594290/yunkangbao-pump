@@ -1,9 +1,9 @@
 #include "temperature.h"
 
-#define TEMP_AD_IN ADC_IN_17               // 温度检测口
-#define TEMP_CHANGE_MAX 6000               // 温度变化后延时时间，*5ms
-#define TEMP_HIGH ((uint)(2.5 * 4096 / 5)) // 过高温保护
-#define TEMP_LOW ((uint)(1.5 * 4096 / 5))  // 低温
+#define TEMP_AD_IN ADC_IN_17                // 温度检测口
+#define TEMP_CHANGE_MAX 300                 // 温度变化后延时时间(100ms)
+#define TEMP_HIGH ((uint)(1.37 * 4096 / 5)) // 过高温保护 40C
+#define TEMP_LOW ((uint)(1.00 * 4096 / 5))  // 低温 30C
 
 static bit CheckNow;
 
@@ -20,7 +20,7 @@ void Temperature_Init()
  * @brief 温度检测标志监视器
  *
  */
-void Temperature_5ms()
+void Temperature_100ms()
 {
     CheckNow = 1;
 }

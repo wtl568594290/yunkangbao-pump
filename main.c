@@ -23,6 +23,7 @@ void T1_Init()
 void T1() interrupt 3
 {
     static uchar count5ms = 0;
+    static uint count100ms = 0;
     static uint count1s = 0;
     if (++count5ms >= 5)
     {
@@ -30,7 +31,12 @@ void T1() interrupt 3
         // 5ms
         Uart_5ms();
         Pump_5ms();
-        Temperature_5ms();
+    }
+    if (++count100ms >= 100)
+    {
+        count100ms = 0;
+        // 100ms
+        Temperature_100ms();
     }
     if (++count1s >= 1000)
     {

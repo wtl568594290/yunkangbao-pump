@@ -5,6 +5,6 @@
 #include "master.h"
 
 void Temperature_Init();
-void Temperature_5ms();
+void Temperature_100ms();
 void Temperature();
 #endif
