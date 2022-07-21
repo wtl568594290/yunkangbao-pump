@@ -22,6 +22,6 @@ typedef enum
 } ADC_IN;
 
 void ADC_Init();
-uint ADC_Get(ADC_IN in);
+uchar ADC_Get(ADC_IN in);
 
 #endif
